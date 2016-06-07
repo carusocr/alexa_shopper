@@ -91,8 +91,35 @@ app.intent('HelpIntent',
     ]
   },
   function (req,res) {
+    con = mysql.createConnection({
+      host        : config.host,
+      user        : config.user,
+      password    : config.password,
+      database    : config.database
+    });
+
+    con.connect(function(err) {
+      if(err){
+        console.log("Can't connect! Check your settings.");
+        return;
+      }
+      console.log("Connection established.");
+    });
+    con.query('select * from grocery_list',function (err, rows){
+      if(err) callback(err);
+
+      for (var i in rows) {
+        console.log("Item:", rows[i].item, "\nPrice:", rows[i].price);
+      }
+      var sardines = rows[0].item;
+      var sardine_price = rows[0].price;
+      var store = rows[0].store;
+      res.say("testing " + sardines);
+      res.send();
+    });
+    return false;
     //res.say("Say the name of a grocery item that you're looking for and I'll seek the lowest price. Not guaranteed, dumbshit!");
-  	res.say("Hey, " + sardines + " are on sale right now at " + store);
+  	//res.say("Hey, " + sardines + " are on sale right now at " + store);
   }
 );
 
