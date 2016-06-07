@@ -35,7 +35,7 @@ con.query('select * from grocery_list',function (err, rows){
 // Define an alexa-app
 var app = new alexa.app('alexa_shopper');
 var sardines = 'sardines';
-var store = 'Q F C'
+//var store = 'Q F C'
 app.launch(function(req,res) {
   response.session ('open_session', 'true');
     response.say("Welcome to mood checker. I want to know how you're doing.");
