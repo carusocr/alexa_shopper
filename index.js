@@ -49,39 +49,23 @@ var app = new alexa.app('shopper');
 //var store = 'Q F C'
 var sardines='sardines';
 var store='zug';
-app.pre = function() {
-  con = mysql.createConnection({
-    host        : config.host,
-    user        : config.user,
-    password    : config.password,
-    database    : config.database
-  });
-
-  con.connect(function(err) {
-    if(err){
-      console.log("Can't connect! Check your settings.");
-      return;
-    }
-    console.log("Connection established.");
-  });
-  con.query('select * from grocery_list',function (err, rows){
-    if(err) callback(err);
-
-    for (var i in rows) {
-      console.log("Item:", rows[i].item, "\nPrice:", rows[i].price);
-    }
-    var sardines = rows[0].item;
-    var sardine_price = rows[0].price;
-    var store = rows[0].store;
-  });
-  
-}
 
 app.launch(function(request,response) {
   response.session ('open_session', 'true');
     response.say("Welcome to grocery shopper. What are you looking for?");
     response.shouldEndSession (false, "If you would like to leave, just say exit.");
 });
+
+app.intent('shopIntent',
+  {
+    "slots" :  {"foodItem": "GroceryItem"},
+    "utterances": [ "{who is selling|where's|where is|I'm looking for} {the cheapest|a|} {-|foodItem}"]
+  },
+  function(req,res) {
+    var food_target = req.slot('foodItem');
+    res.say("You said that you're looking for " + food_target);
+  }
+);
 
 app.intent('HelpIntent',
   {
@@ -112,9 +96,9 @@ app.intent('HelpIntent',
         console.log("Item:", rows[i].item, "\nPrice:", rows[i].price);
       }
       var sardines = rows[0].item;
-      var sardine_price = rows[0].price;
+      var price = rows[0].price;
       var store = rows[0].store;
-      res.say("testing " + sardines);
+      res.say("I found " + sardines + " for " + price + " at " + store);
       res.send();
     });
     return false;
@@ -123,6 +107,23 @@ app.intent('HelpIntent',
   }
 );
 
+/*
+
+TO-DO: move db query to findItem function, and add grocery items to slots?
+
+app.intent('FeelsIntent',
+  {
+    "slots": {"rating":"NUMBER"},
+    "utterances": [
+      "{i feel|i am|maybe|around|i'm|about|} {a|around|about|} {a|} {rating}"]
+  },
+  function(req,res) {
+    var feel_rating = req.slot('rating');
+    res.say("You said that you're feeling around a" + feel_rating + "on a scale of one to ten. Why is that?");
+  }
+);
+*/
+/*
 app.intent('FeelsIntent',
   {
     "slots": {"rating":"NUMBER"},
@@ -162,7 +163,7 @@ app.intent('guess',{
     }
   }
 );
-
+*/
 exports.handler = app.lambda();
 
 if ((process.argv.length === 3) && (process.argv[2] === 'schema')){
