@@ -52,6 +52,18 @@ app.intent('shopIntent',
       }
       console.log("Connection established.");
     });
+    /* Notes on item lookup in database:
+
+    - How to handle when multiple items match the search phrase, like 'chicken thighs'
+      and 'chicken breasts' when user says 'find me chicken'?
+        - Could say "I found multiple items that match your search phrase. Which of these
+          are you interested in?" Then either return price for the more specific item, 
+          or just say "Okay" if user says "nothing".
+    - Also, how to check LOWEST price? Prices are stored as strings. And how to handle
+
+
+
+    */
     var sql = 'select * from grocery_list where item like "%' + food_target + '%"';
     con.query(sql, function (err, rows){
       if(err) callback(err);
