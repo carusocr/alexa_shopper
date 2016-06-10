@@ -75,13 +75,14 @@ app.intent('shopIntent',
         //populate array of items, if more than 1 ask for clarification
       }
       
+      var clarified_item = rows[0].item;
       if(item_list.length > 1) {
         item_genre = item_list.toString();
         res.say("I found more than one result for " + food_target + " . " + item_genre);
-        res.say("If you meant one of those, just say its name. Otherwise, say no.");
-        var clarified_item = req.slot();
+        res.say(". If you meant one of those, just say its name. Otherwise, say no.");
+        var clarified_item = req.slot('foodItem');
         res.say("You said " + clarified_item + " . ");
-        res.send();
+        //res.send();
       }
 
 
@@ -89,7 +90,7 @@ app.intent('shopIntent',
       var price = rows[0].price;
       var store = rows[0].store;
       res.say("I found " + clarified_item + " for " + price + " at " + store);
-      //res.send();
+      res.send();
     });
     return false;
   }
