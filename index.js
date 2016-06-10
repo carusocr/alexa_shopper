@@ -78,14 +78,18 @@ app.intent('shopIntent',
       if(item_list.length > 1) {
         item_genre = item_list.toString();
         res.say("I found more than one result for " + food_target + " . " + item_genre);
-        //res.say("Found multiple!");
+        res.say("If you meant one of those, just say its name. Otherwise, say no.");
+        var clarified_item = req.slot();
+        res.say("You said " + clarified_item + " . ");
         res.send();
       }
+
+
       var food = rows[0].item; //food_target already has name, use that?
       var price = rows[0].price;
       var store = rows[0].store;
-      res.say("I found " + food_target + " for " + price + " at " + store);
-      res.send();
+      res.say("I found " + clarified_item + " for " + price + " at " + store);
+      //res.send();
     });
     return false;
   }
