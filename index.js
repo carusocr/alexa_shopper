@@ -60,6 +60,7 @@ app.intent('shopIntent',
           are you interested in?" Then either return price for the more specific item, 
           or just say "Okay" if user says "nothing".
     - Also, how to check LOWEST price? Prices are stored as strings. And how to handle
+        when something is like "2 for 2.99" versus "1.99 each"?
 
 
 
@@ -67,6 +68,7 @@ app.intent('shopIntent',
     var sql = 'select * from grocery_list where item like "%' + food_target + '%"';
     con.query(sql, function (err, rows){
       if(err) callback(err);
+
 
       for (var i in rows) {
         console.log("Item:", rows[i].item, "\nPrice:", rows[i].price);
@@ -98,6 +100,45 @@ exports.handler = app.lambda();
 if ((process.argv.length === 3) && (process.argv[2] === 'schema')){
   console.log (app.schema ());
   console.log (app.utterances ());
+}
+
+if (process.argv[2] === 'test') {
+  var food_target = 'chicken';
+
+  con = mysql.createConnection({
+    host        : config.host,
+    user        : config.user,
+    password    : config.password,
+    database    : config.database
+  });
+
+  con.connect(function(err) {
+    if(err){
+      console.log("Can't connect! Check your settings.");
+      return;
+    }
+    console.log("Connection established.");
+  });
+
+  var sql = 'select * from grocery_list where item like "%' + food_target + '%"';
+  con.query(sql, function (err, rows){
+    if(err) throw err;
+
+    if (rows.length > 1) {
+      console.log("More than 1 result!");
+      // build array of items here, then ask for specifics? Join array into string, pass to:
+      // "I found multiple items that match your request. Was it one of these? [items]"
+      //Possible responses are any of the items, or 'no'. 
+    }
+
+    for (var i in rows) {
+      console.log("Item:", rows[i].item, "\nPrice:", rows[i].price);
+    }
+    var food = rows[0].item; //food_target already has name, use that?
+    var price = rows[0].price;
+    var store = rows[0].store;
+    //console.
+  });
 }
 
 con.end(function(err) {
