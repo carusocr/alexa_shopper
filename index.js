@@ -86,12 +86,18 @@ app.intent('shopIntent',
       
       var clarified_item = rows[0].item;
       if(item_list.length > 1) {
-        item_genre = item_list.toString();
-        res.say("I found more than one result for " + food_target + " . " + item_genre);
-        res.reprompt(". If you meant one of those, just say its name. Otherwise, say no.");
-        var clarified_item = req.slot('foodItem');
-        res.send();
-        res.shouldEndSession(false);
+        if (item_list.indexOf(food_target) != item_list.lastIndexOf(food_target)) {
+          res.say(food_target + " is sold at more than one location.");
+          res.send();
+        }
+        else {
+          item_genre = item_list.toString();
+          res.say("I found more than one result for " + food_target + " . " + item_genre + ". If you meant one of those, just say its name. Otherwise, say 'none of those'.");
+          //res.reprompt(". If you meant one of those, just say its name. Otherwise, say 'nothing'.");
+          var clarified_item = req.slot('foodItem');
+          res.send();
+          res.shouldEndSession(false);
+        }
       }
       else {
         var food = rows[0].item; //food_target already has name, use that?
