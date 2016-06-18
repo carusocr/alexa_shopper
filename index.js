@@ -62,9 +62,18 @@ app.intent('shopIntent',
     - Also, how to check LOWEST price? Prices are stored as strings. And how to handle
         when something is like "2 for 2.99" versus "1.99 each"?
 
+    Flow:
+
+    - select * from grocery_list where item like food_target
+    - iterate over results, populate list
+    - if all item names match requested item, choose one with lowest price
+    - if multiple names, get clarifiation and go back to first step (exit if 'nothing')
+
 
 
     */
+
+
     var sql = 'select * from grocery_list where item like "%' + food_target + '%"';
     con.query(sql, function (err, rows){
       if(err) callback(err);
@@ -79,18 +88,18 @@ app.intent('shopIntent',
       if(item_list.length > 1) {
         item_genre = item_list.toString();
         res.say("I found more than one result for " + food_target + " . " + item_genre);
-        res.say(". If you meant one of those, just say its name. Otherwise, say no.");
+        res.reprompt(". If you meant one of those, just say its name. Otherwise, say no.");
         var clarified_item = req.slot('foodItem');
-        res.say("You said " + clarified_item + " . ");
-        //res.send();
+        res.send();
+        res.shouldEndSession(false);
       }
-
-
-      var food = rows[0].item; //food_target already has name, use that?
-      var price = rows[0].price;
-      var store = rows[0].store;
-      res.say("I found " + clarified_item + " for " + price + " at " + store);
-      res.send();
+      else {
+        var food = rows[0].item; //food_target already has name, use that?
+        var price = rows[0].price;
+        var store = rows[0].store;
+        res.say("I found " + clarified_item + " for " + price + " at " + store);
+        res.send();
+      }
     });
     return false;
   }
