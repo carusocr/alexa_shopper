@@ -85,9 +85,25 @@ app.intent('shopIntent',
       }
       
       var clarified_item = rows[0].item;
+      /*
+
+      Should redo this with item_list as hash object, push array of name+price+store. 
+      Something like:
+
+      var item_list = {};
+      for (var i in rows) {
+		item_list[i] = ([rows[i].item,rows[i].price,rows[i].store]);
+      }
+
+      And then how do I do the checking for same/related items?
+
+      */ 
       if(item_list.length > 1) {
+      	// what about if there are two incidences of same item name but also fuzzy names?
+      	// e.g. 'sardines','sardines','fresh sardines' ?
         if (item_list.indexOf(food_target) != item_list.lastIndexOf(food_target)) {
           res.say(food_target + " is sold at more than one location.");
+          // add price comparison here
           res.send();
         }
         else {
