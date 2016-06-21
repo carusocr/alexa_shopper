@@ -52,27 +52,6 @@ app.intent('shopIntent',
       }
       console.log("Connection established.");
     });
-    /* Notes on item lookup in database:
-
-    - How to handle when multiple items match the search phrase, like 'chicken thighs'
-      and 'chicken breasts' when user says 'find me chicken'?
-        - Could say "I found multiple items that match your search phrase. Which of these
-          are you interested in?" Then either return price for the more specific item, 
-          or just say "Okay" if user says "nothing".
-    - Also, how to check LOWEST price? Prices are stored as strings. And how to handle
-        when something is like "2 for 2.99" versus "1.99 each"?
-
-    Flow:
-
-    - select * from grocery_list where item like food_target
-    - iterate over results, populate list
-    - if all item names match requested item, choose one with lowest price
-    - if multiple names, get clarifiation and go back to first step (exit if 'nothing')
-
-
-
-    */
-
 
     var sql = 'select * from grocery_list where item like "%' + food_target + '%"';
     con.query(sql, function (err, rows){
@@ -85,35 +64,16 @@ app.intent('shopIntent',
       }
       
       var clarified_item = rows[0].item;
-      /*
-
-      Should redo this with item_list as hash object, push array of name+price+store. 
-      Something like:
-
-      var item_list = {};
-      for (var i in rows) {
-		item_list[i] = ([rows[i].item,rows[i].price,rows[i].store]);
-      }
-
-      And then how do I do the checking for same/related items?
-
-      */ 
       if(item_list.length > 1) {
       	// what about if there are two incidences of same item name but also fuzzy names?
       	// e.g. 'sardines','sardines','fresh sardines' ?
-        if (item_list.indexOf(food_target) != item_list.lastIndexOf(food_target)) {
-          res.say(food_target + " is sold at more than one location.");
-          // add price comparison here
-          res.send();
-        }
-        else {
-          item_genre = item_list.toString();
-          res.say("I found more than one result for " + food_target + " . " + item_genre + ". If you meant one of those, just say its name. Otherwise, say 'none of those'.");
-          //res.reprompt(". If you meant one of those, just say its name. Otherwise, say 'nothing'.");
-          var clarified_item = req.slot('foodItem');
-          res.send();
-          res.shouldEndSession(false);
-        }
+      	// Handle this on the backend, with the shopper script only adding cheapest dupe items.
+	    item_genre = item_list.toString();
+	    res.say("I found more than one result for " + food_target + " . " + item_genre + ". If you meant one of those, just say its name. Otherwise, say 'none of those'.");
+	    res.reprompt(". If you meant one of those, just say its name. Otherwise, say 'nothing'.");
+	    clarified_item = req.slot('foodItem');
+	    res.send();
+	    res.shouldEndSession(false);
       }
       else {
         var food = rows[0].item; //food_target already has name, use that?
@@ -135,7 +95,7 @@ app.intent('HelpIntent',
     ]
   },
   function(req,res){
-    res.say("Say the name of a grocery item that you're looking for and I'll seek the lowest price. Not guaranteed, dumbshit!");
+    res.say("Say the name of a grocery item that you're looking for and I'll seek the lowest price.");
   }
 );
 
