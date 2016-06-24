@@ -52,7 +52,6 @@ app.intent('shopIntent',
       }
       console.log("Connection established.");
     });
-
     var sql = 'select * from grocery_list where item like "%' + food_target + '%"';
     con.query(sql, function (err, rows){
       if(err) callback(err);
@@ -60,7 +59,6 @@ app.intent('shopIntent',
       for (var i in rows) {
         item_list.push(rows[i].item);
         console.log("Item:", rows[i].item, "\nPrice:", rows[i].price);
-        //populate array of items, if more than 1 ask for clarification
       }
       
       var clarified_item = rows[0].item;
@@ -69,24 +67,26 @@ app.intent('shopIntent',
       	// e.g. 'sardines','sardines','fresh sardines' ?
       	// Handle this on the backend, with the shopper script only adding cheapest dupe items.
 	    item_genre = item_list.toString();
-	    res.say("I found more than one result for " + food_target + " . " + item_genre + ". If you meant one of those, just say its name. Otherwise, say 'none of those'.");
-	    res.reprompt(". If you meant one of those, just say its name. Otherwise, say 'nothing'.");
+	    res.say("I found more than one result for " + food_target + " . " + item_genre + ". If you meant one of those, just say its name. Otherwise, say 'none of those'.").send();
 	    clarified_item = req.slot('foodItem');
-	    res.send();
 	    res.shouldEndSession(false);
-      }
+	  }
       else {
-        var food = rows[0].item; //food_target already has name, use that?
-        var price = rows[0].price;
-        var store = rows[0].store;
-        res.say("I found " + clarified_item + " for " + price + " at " + store);
-        res.send();
+      	if(rows[0].item == 'none of those'){
+      		res.say("Sorry I couldn't help you!").send();
+      		res.shouldEndSession(true);
+      	}
+       	else {
+        	var food = rows[0].item;
+        	var price = rows[0].price;
+        	var store = rows[0].store;
+        	res.say("I found " + clarified_item + " for " + price + " at " + store).send();
+        }
       }
     });
     return false;
   }
 );
-
 app.intent('HelpIntent',
   {
     "slots" : {},
@@ -95,9 +95,13 @@ app.intent('HelpIntent',
     ]
   },
   function(req,res){
-    res.say("Say the name of a grocery item that you're looking for and I'll seek the lowest price.");
+    res.say("Tell me what you're looking for and I'll seek the lowest price.");
   }
 );
+
+app.intent('errorIntent', function(req,res) {
+	res.say("I'm sorry, I didn't understand that.");
+});
 
 exports.handler = app.lambda();
 
