@@ -37,13 +37,6 @@ app.intent('shopIntent',
   },
   function(req,res) {
     var food_target = req.slot('foodItem');
-    /*
-    if(food_target == 'nothing') {
-    	res.say("I'm sorry I couldn't help you.");
-    	res.send();
-    	res.shouldEndSession(true);
-    }
-    */
     res.say("You said that you're looking for " + food_target + "...");
     con = mysql.createConnection({
       host        : config.host,
@@ -66,7 +59,6 @@ app.intent('shopIntent',
       for (var i in rows) {
         item_list.push(rows[i].item);
         console.log("Item:", rows[i].item, "\nPrice:", rows[i].price);
-        //populate array of items, if more than 1 ask for clarification
       }
       
       var clarified_item = rows[0].item;
@@ -75,23 +67,26 @@ app.intent('shopIntent',
       	// e.g. 'sardines','sardines','fresh sardines' ?
       	// Handle this on the backend, with the shopper script only adding cheapest dupe items.
 	    item_genre = item_list.toString();
-	    res.say("I found more than one result for " + food_target + " . " + item_genre + ". If you meant one of those, just say its name. Otherwise, say 'nothing'.").send();
+	    res.say("I found more than one result for " + food_target + " . " + item_genre + ". If you meant one of those, just say its name. Otherwise, say 'none of those'.").send();
 	    clarified_item = req.slot('foodItem');
-	    //res.shouldEndSession(false);
+	    res.shouldEndSession(false);
 	  }
       else {
-      	//add bit about 'nothing' here?K3lthana
-      	
-        var food = rows[0].item; //food_target already has name, use that?
-        var price = rows[0].price;
-        var store = rows[0].store;
-        res.say("I found " + clarified_item + " for " + price + " at " + store).send();
+      	if(rows[0].item == 'none of those'){
+      		res.say("Sorry I couldn't help you!").send();
+      		res.shouldEndSession(true);
+      	}
+       	else {
+        	var food = rows[0].item;
+        	var price = rows[0].price;
+        	var store = rows[0].store;
+        	res.say("I found " + clarified_item + " for " + price + " at " + store).send();
+        }
       }
     });
     return false;
   }
 );
-
 app.intent('HelpIntent',
   {
     "slots" : {},
@@ -103,6 +98,10 @@ app.intent('HelpIntent',
     res.say("Tell me what you're looking for and I'll seek the lowest price.");
   }
 );
+
+app.intent('errorIntent', function(req,res) {
+	res.say("I'm sorry, I didn't understand that.");
+});
 
 exports.handler = app.lambda();
 
