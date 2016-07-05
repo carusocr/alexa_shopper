@@ -1,48 +1,6 @@
-/*
-TO-DO in order to get certified:
-
-**1. The skill consistently returns an error when it is launched. 
-Please see the following documentation for how to return responses to request sent by Alexa:
-
-https://developer.amazon.com/appsandservices/solutions/alexa/alexa-skills-kit/docs/handling-requests-sent-by-alexa
-
-Example:
-User: "Alexa, ask meat seeker to find me the cheapest ribeye steak."
-Skill: "There was a problem with the requested skill's response"
-Request Identifier: amzn1.echo-api.request.8ccf7041-c9cf-493a-adfb-d439ce1e8ab2
-
-**2.When invoking the “shopIntent” intent with no value provided for the “foodItem” slot, 
-the skill returns an error. Please see test case 4.11 from our Submission Checklist  for 
-guidance on error handling.
-
-Example:
-
-User: “Alexa open meat seeker"
-Skill "Welcome to meatseeker. What are you looking for?"
-User "I’m looking for the cheapest"
-Skill "There was a problem with the requested skill's response"
-Request Identifier: amzn1.echo-api.request.1598ce8d-cfc2-4d0c-be8b-6b9bd600aab6
-
-**3.When users ask for “help” within the skill, it must return a prompt which 
-instructs users how to navigate the skill’s core functionality. Additionally, 
-the help prompt must end with a question for users and leave the stream open to receive a response. 
-Please see test case 4.12 from our Submission Checklist for guidance on the help intent.
-
-Example:
-User :”Alexa open meat seeker"
-Skill: "Welcome to meatseeker. What are you looking for?"
-User: "help"
-Skill: “Tell me what you're looking for and I'll seek the lowest price."
-
-**4. The skill does not respond appropriately when users say “stop” or “cancel”. 
-Please see test case 4.13 from our Submission Checklist for guidance on skill exiting.
-
-Example:
-User :"Alexa open meat seeker"
-Skill :"Welcome to meatseeker. What are you looking for?"
-User: "stop" /”Cancel”
-Skill: "Tell me what you're looking for and I'll seek the lowest price."
-
+/* Meatseeker 0.1
+Author: Chris Caruso
+June 2016
 */
 var alexa = require('alexa-app');
 var mysql = require('mysql');
@@ -82,11 +40,13 @@ app.intent('shopIntent',
     var food_target = req.slot('foodItem');
     
     if(food_target === undefined) {
-    	res.say("Wot?").send();
+    	res.say("You didn't specify a search item. Try saying something like, 'where can I find the cheapest ribeye steak?'").send();
     	res.shouldEndSession(false);
     	return false;
     }
-    
+    if(food_target === "stop" || food_target === "abort" || food_target === "cancel") {
+    	res.shouldEndSession(true);
+    }
     res.say("You said that you're looking for " + food_target + "...");
     con = mysql.createConnection({
       host        : config.host,
@@ -144,6 +104,7 @@ app.intent('shopIntent',
     return false;
   }
 );
+
 app.intent('HelpIntent',
   {
     "slots" : {},
@@ -152,13 +113,24 @@ app.intent('HelpIntent',
     ]
   },
   function(req,res){
-    res.say("Tell me what you're looking for and I'll seek the lowest price.");
+    res.say("Tell me what you're looking for and I'll seek the lowest price. Try saying something like, 'where can I find the cheapest ribeye steak?'");
+    res.shouldEndSession(false);
   }
 );
 
-app.intent('errorIntent', function(req,res) {
-	res.say("I'm sorry, I didn't understand that.");
-});
+app.intent('StopIntent', 
+	{
+    	"slots" : {},
+    	"utterances": [
+      		"stop",
+      		"cancel",
+      		"abort"
+    	]
+  	},
+  	function(req,res) {
+		res.shouldEndSession(true);
+	}
+);
 
 exports.handler = app.lambda();
 
