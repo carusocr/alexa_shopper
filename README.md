@@ -4,6 +4,6 @@ Skill to query crawler-collected grocery store sale data and find cheapest store
 
 Example: "Where can I find the cheapest sardines?" will prompt alexa_shopper to check the database for any sardines listed in any of the weekly ads, and then report the lowest price and which store is selling them.
 
-Video demo:
+Click image to navigate to video demo:
 
 [![Launch Meatseeker!](https://img.youtube.com/vi/SMHisxJHwXw/0.jpg)](https://www.youtube.com/watch?v=SMHisxJHwXw)
